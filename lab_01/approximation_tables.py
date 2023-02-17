@@ -147,23 +147,17 @@ class HermiteDiffsTable(DiffsTable):
         diffs: list[list[float], list[float]] = [ExtendedList(coordinates[0]), ExtendedList(coordinates[1])]
         self.derivatives = ExtendedList(coordinates[2])
 
-        column = []
-        for j in range(len(self.partial_table) * 2 - 1 - (power + 1) % 2):
-            partial_x_difference = diffs[0][j] - diffs[0][j + 1]
-            if j % 2 == 0:
-                column.append(self.derivatives[j])
-                continue
-            partial_y_difference = diffs[1][j] - diffs[1][j + 1]
-            column.append(partial_y_difference / partial_x_difference)
-        diffs.append(column)
-
-        for i in range(2, len(self.partial_table) * 2 - (power + 1) % 2):
+        for i in range(1, len(self.partial_table) * 2 - (power + 1) % 2):
             column = []
             for j in range(len(self.partial_table) * 2 - i - (power + 1) % 2):
+                if i == 1 and j % 2 == 0:
+                    column.append(self.derivatives[j])
+                    continue
                 partial_x_difference = diffs[0][j] - diffs[0][j + i]
                 partial_y_difference = diffs[i][j] - diffs[i][j + 1]
                 column.append(partial_y_difference / partial_x_difference)
             diffs.append(column)
+
         self.diffs = diffs
         self.points_used = len(self.diffs[0]) - (self.power + 1) % 2
 
