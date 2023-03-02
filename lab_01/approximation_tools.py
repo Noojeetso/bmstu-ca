@@ -1,3 +1,5 @@
+import math
+
 from approximation_tables import *
 
 
@@ -15,7 +17,7 @@ def get_power() -> int:
     return power
 
 
-def adjust_table(converting_point_table: PointTable, origin_point_table: PointTable, power: int) -> PointTable:
+def adjust_table(converting_point_table: PointTable, origin_point_table: PointTable, power: int) -> PointTable | None:
     src_coordinates: list[list[float], list[float]] = origin_point_table.get_coordinates()[:2]
 
     newton_table = NewtonDiffsTable(converting_point_table)
@@ -23,6 +25,8 @@ def adjust_table(converting_point_table: PointTable, origin_point_table: PointTa
     new_points: list[Point] = []
     for new_x in src_coordinates[0]:
         new_y = newton_table.get_value(new_x, power)
+        if math.isnan(new_y):
+            return
         point = Point(new_x, new_y, [])
         new_points.append(point)
 
@@ -64,6 +68,8 @@ def solve_equations():
         return
 
     adjusted_points_table = adjust_table(point_table_1, point_table_2, power)
+    if adjusted_points_table is None:
+        return
     adjusted_points_table.print("First table after adjustment")
 
     subtracted_point_table = subtract_tables(point_table_2, adjusted_points_table)
@@ -73,10 +79,14 @@ def solve_equations():
     newton_table_subtracted = NewtonDiffsTable(subtracted_point_table)
     newton_table_subtracted.inverse = True
     result_x = newton_table_subtracted.get_value(0, power)
+    if math.isnan(result_x):
+        return
     newton_table_subtracted.print()
 
     newton_table_2 = NewtonDiffsTable(point_table_2)
     result_y = newton_table_2.get_value(result_x, power)
+    if math.isnan(result_y):
+        return
     newton_table_2.print()
 
     print("Root by Newton's method: x = {:.3f}; y = {:.3f}".format(result_x, result_y))
@@ -105,9 +115,13 @@ def compare_approximation():
         return
 
     result = newton_diff_table.get_value(arg, power)
+    if math.isnan(result):
+        return
     newton_diff_table.print()
     print("Approximation by Newton's method: {:.3f}\n".format(result))
     result = hermite_diff_table.get_value(arg, power)
+    if math.isnan(result):
+        return
     hermite_diff_table.print()
     print("Approximation by Hermite's method: {:.3f}".format(result))
 
@@ -116,7 +130,6 @@ def compare_root_finding():
     point_table = PointTable()
     point_table.inverse = True
     point_table.from_file("table.txt")
-    # point_table.flip_relation()
     point_table.sort()
     point_table.print("Table")
     newton_diff_table = NewtonDiffsTable(point_table)
@@ -130,10 +143,14 @@ def compare_root_finding():
 
     newton_diff_table.inverse = True
     result = newton_diff_table.get_value(0, power)
+    if math.isnan(result):
+        return
     newton_diff_table.print()
     print("Root by Newton's method: {:.3f}\n".format(result))
 
     hermite_diff_table.inverse = True
     result = hermite_diff_table.get_value(0, power)
+    if math.isnan(result):
+        return
     hermite_diff_table.print()
     print("Root by Hermite's method: {:.3f}".format(result))

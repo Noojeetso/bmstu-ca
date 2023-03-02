@@ -78,13 +78,7 @@ class PointTable:
                     raise ValueError
                 new_point = Point(x, y, derivatives)
                 self.points.append(new_point)
-        # if flip_relation:
-        #     self.flip_relation()
         self.sort()
-
-    # def flip_relation(self):
-    #     self.function, self.argument = self.argument, self.function
-    #     print("()->():",  self.function, self.argument)
 
     def sort(self):
         if not self.inverse:

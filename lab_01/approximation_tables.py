@@ -145,6 +145,19 @@ class DiffsTable:
 
 
 class HermiteDiffsTable(DiffsTable):
+    def get_value(self, argument: float, power: int) -> float:
+        self.power = power
+        self.update_partial_table(argument)
+        self.calculate_diffs(power)
+        return super().get_value(argument, power)
+
+    def check_power(self, power: int) -> bool:
+        return len(self.point_table) * 2 >= power + 1
+
+    def update_partial_table(self, argument: float):
+        self.partial_table.inverse = self.inverse
+        self.partial_table.set_partition(argument, self.power // 2 + 1)
+
     def calculate_diffs(self, power: int):
         coordinates = self.partial_table.get_coordinates()
         diffs: list[list[float], list[float]] = [ExtendedList(coordinates[0]), ExtendedList(coordinates[1])]
@@ -164,21 +177,27 @@ class HermiteDiffsTable(DiffsTable):
         self.diffs = diffs
         self.points_used = len(self.diffs[0]) - (self.power + 1) % 2
 
-    def update_partial_table(self, argument: float):
-        self.partial_table.inverse = self.inverse
-        self.partial_table.set_partition(argument, self.power // 2 + 1)
-
-    def get_value(self, argument: float, power: int) -> float:
-        self.power = power
-        self.update_partial_table(argument)
-        self.calculate_diffs(power)
-        return super().get_value(argument, power)
-
     def print(self) -> None:
-        super().print_("Hermite table")
+        super().print_("Hermite's table")
 
 
 class NewtonDiffsTable(DiffsTable):
+    def get_value(self, argument: float, power: int) -> float:
+        if not self.check_power(power):
+            print("Power is too big")
+            return float("nan")
+        self.power = power
+        self.update_partial_table(argument)
+        self.calculate_diffs()
+        return super().get_value(argument, power)
+
+    def check_power(self, power: int) -> bool:
+        return len(self.point_table) >= power + 1
+
+    def update_partial_table(self, argument: float):
+        self.partial_table.inverse = self.inverse
+        self.partial_table.set_partition(argument, self.power + 1)
+
     def calculate_diffs(self):
         coordinates = self.partial_table.get_coordinates()
         diffs: list[list[float], list[float]] = [coordinates[0], coordinates[1]]
@@ -193,20 +212,5 @@ class NewtonDiffsTable(DiffsTable):
         self.diffs = diffs
         self.points_used = len(self.diffs[0])
 
-    def update_partial_table(self, argument: float):
-        self.partial_table.inverse = self.inverse
-        self.partial_table.set_partition(argument, self.power + 1)
-
-    def configure(self, argument: float, power: int) -> None:
-        self.power = power
-        self.update_partial_table(argument)
-        self.calculate_diffs()
-
-    def get_value(self, argument: float, power: int) -> float:
-        self.power = power
-        self.update_partial_table(argument)
-        self.calculate_diffs()
-        return super().get_value(argument, power)
-
     def print(self) -> None:
-        super().print_("Newton table")
+        super().print_("Newton's table")
