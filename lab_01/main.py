@@ -23,6 +23,7 @@ def menu():
     except ValueError:
         print("Incorrect menu number\n")
         return
+    print("")
 
     if num == 0:
         is_running = False

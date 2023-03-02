@@ -68,6 +68,7 @@ def solve_equations():
 
     subtracted_point_table = subtract_tables(point_table_2, adjusted_points_table)
     subtracted_point_table.print("Second table after subtraction")
+    subtracted_point_table.sort()
 
     newton_table_subtracted = NewtonDiffsTable(subtracted_point_table)
     newton_table_subtracted.inverse = True
@@ -113,7 +114,10 @@ def compare_approximation():
 
 def compare_root_finding():
     point_table = PointTable()
+    point_table.inverse = True
     point_table.from_file("table.txt")
+    # point_table.flip_relation()
+    point_table.sort()
     point_table.print("Table")
     newton_diff_table = NewtonDiffsTable(point_table)
     hermite_diff_table = HermiteDiffsTable(point_table)

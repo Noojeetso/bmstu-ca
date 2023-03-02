@@ -124,10 +124,13 @@ class DiffsTable:
         if len(self.diffs) == 0:
             print("{} is empty\n".format(table_name))
             return
-
-        print("{}:".format(table_name))
-        print("\t\t{:^10.10s}".format("x"), end='')
-        for i in range(len(self.diffs) - 1):
+        print(table_name)
+        function = self.point_table.function
+        argument = self.point_table.argument
+        if self.inverse:
+            function, argument = argument, function
+        print("\t\t{:^10.10s}|{:^10.10s}".format(argument, function), end='')
+        for i in range(1, len(self.diffs) - 1):
             print("|{:^10.10s}".format("y" + "'" * i), end='')
         print("")
         for i in range(self.points_used):
@@ -193,6 +196,11 @@ class NewtonDiffsTable(DiffsTable):
     def update_partial_table(self, argument: float):
         self.partial_table.inverse = self.inverse
         self.partial_table.set_partition(argument, self.power + 1)
+
+    def configure(self, argument: float, power: int) -> None:
+        self.power = power
+        self.update_partial_table(argument)
+        self.calculate_diffs()
 
     def get_value(self, argument: float, power: int) -> float:
         self.power = power

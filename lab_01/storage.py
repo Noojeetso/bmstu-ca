@@ -22,6 +22,7 @@ class PointTable:
     epsilon = 1e-6
     function = 'y'
     argument = 'x'
+    inverse: bool = False
     points: list[Point]
 
     def __len__(self):
@@ -69,12 +70,36 @@ class PointTable:
                     x, y = map(float, item[:2])
                     if len(item) > 2:
                         derivatives = list(map(float, item[2:]))
+                    if any(derivative == 0 for derivative in derivatives):
+                        print("Zero derivatives are not allowed:", line)
+                        raise ValueError
                 except ValueError:
                     print("File contains corrupted line:", line)
                     raise ValueError
-                point = Point(x, y, derivatives)
-                self.points.append(point)
-        self.points.sort(key=lambda e: e.x)
+                new_point = Point(x, y, derivatives)
+                self.points.append(new_point)
+        # if flip_relation:
+        #     self.flip_relation()
+        self.sort()
+
+    # def flip_relation(self):
+    #     self.function, self.argument = self.argument, self.function
+    #     print("()->():",  self.function, self.argument)
+
+    def sort(self):
+        if not self.inverse:
+            self.points.sort(key=lambda point: point.x)
+        else:
+            self.points.sort(key=lambda point: point.y)
+
+    def get_coordinates(self):
+        coordinates: list[list[float], list[float], list[float]] = [[], [], []]
+        for point in self.points:
+            coordinates[0].append(point.x)
+            coordinates[1].append(point.y)
+            if len(point.derivatives):
+                coordinates[2].append(point.derivatives[0])
+        return coordinates
 
     def print(self, table_name: str):
         if len(self.points) == 0:
@@ -90,12 +115,3 @@ class PointTable:
             print("{: 2}).\t".format(i), end='')
             point.print()
         print("")
-
-    def get_coordinates(self):
-        coordinates: list[list[float], list[float], list[float]] = [[], [], []]
-        for point in self.points:
-            coordinates[0].append(point.x)
-            coordinates[1].append(point.y)
-            if len(point.derivatives):
-                coordinates[2].append(point.derivatives[0])
-        return coordinates
