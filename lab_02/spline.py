@@ -5,6 +5,7 @@ class Spline:
     array: np.ndarray
     sweep_coefficients: np.ndarray
     spline_coefficients: np.ndarray
+    step_values: np.ndarray
     start_derivative: float
     end_derivative: float
 
@@ -17,6 +18,10 @@ class Spline:
 
         self.start_derivative = start_derivative
         self.end_derivative = end_derivative
+
+        self.step_values = self.calculate_step_values()
+        if self.step_values is None:
+            raise ValueError
 
         self.sweep_coefficients = self.calculate_sweep_coefficients()
         if self.sweep_coefficients is None:
@@ -41,6 +46,20 @@ class Spline:
 
         return value
 
+    def calculate_step_values(self) -> np.ndarray | None:
+        if self.array.shape[0] != 2:
+            print("Incorrect array shape")
+            return None
+
+        length = self.array.shape[1]
+        step_values = np.empty((length, ), dtype=float)
+
+        for i in range(1, length):
+            step = self.array[0][i] - self.array[0][i - 1]
+            step_values[i] = step
+
+        return step_values
+
     def calculate_sweep_coefficients(self) -> np.ndarray | None:
         if self.array.shape[0] != 2:
             print("Incorrect array shape")
@@ -57,12 +76,17 @@ class Spline:
         eta_values[1] = self.start_derivative / 2
 
         for i in range(2, length):
-            h2 = self.array[0][i - 1] - self.array[0][i - 2]
-            h1 = self.array[0][i] - self.array[0][i - 1]
-            func = 3 * ((self.array[1][i] - self.array[1][i - 1]) / h1 - (self.array[1][i - 1] - self.array[1][i - 2]) / h2)
-            # divider = 2 * (h1 + h2) + h2 * coefficients[0][i - 1]
-            ksi_values[i] = - h2 / (2 * (h1 + h2) + h1 * ksi_values[i - 1])
-            eta_values[i] = (func - h2 * eta_values[i - 1]) / (2 * (h1 + h2) + h2 * ksi_values[i - 1])
+            h1 = self.step_values[i]
+            h2 = self.step_values[i - 1]
+            y_1 = self.array[1][i]
+            y_2 = self.array[1][i - 1]
+            y_3 = self.array[1][i - 2]
+
+            divider = 2 * (h1 + h2) + h2 * ksi_values[i - 1]
+            ksi_values[i] = - h2 / divider
+
+            func = 3 * ((y_1 - y_2) / h1 - (y_2 - y_3) / h2)
+            eta_values[i] = (func - h2 * eta_values[i - 1]) / divider
 
         # print("ksi:", ksi_values)
         # print("eta:", eta_values)
@@ -84,26 +108,33 @@ class Spline:
 
         for i in range(length - 2, -1, -1):
             c_next = c_coefficients[i + 1]
-            c = self.sweep_coefficients[0][i + 1] * c_next + self.sweep_coefficients[1][i + 1]
+            ksi = self.sweep_coefficients[0][i + 1]
+            eta = self.sweep_coefficients[1][i + 1]
+
+            c = ksi * c_next + eta
             c_coefficients[i] = c
 
     def fill_b_coefficients(self, b_coefficients: np.ndarray, c_coefficients: np.ndarray) -> None:
         length = self.sweep_coefficients.shape[1]
 
         for i in range(1, length):
-            h1 = self.array[0][i] - self.array[0][i - 1]
+            h1 = self.step_values[i]
+            y_1 = self.array[1][i]
+            y_2 = self.array[1][i - 1]
             c = c_coefficients[i]
             c_prev = c_coefficients[i - 1]
-            b = (self.array[1][i] - self.array[1][i - 1]) / h1 - h1 * (c + 2 * c_prev) / 3
+
+            b = (y_1 - y_2) / h1 - h1 * (c + 2 * c_prev) / 3
             b_coefficients[i - 1] = b
 
     def fill_d_coefficients(self, d_coefficients: np.ndarray, c_coefficients: np.ndarray) -> None:
         length = self.sweep_coefficients.shape[1]
 
         for i in range(1, length):
-            h1 = self.array[0][i] - self.array[0][i - 1]
+            h1 = self.step_values[i]
             c = c_coefficients[i]
             c_prev = c_coefficients[i - 1]
+
             d = (c - c_prev) / (3 * h1)
             d_coefficients[i - 1] = d
 
