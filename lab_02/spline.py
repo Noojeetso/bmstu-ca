@@ -103,8 +103,14 @@ class Spline:
 
     def fill_c_coefficients(self, c_coefficients: np.ndarray) -> None:
         length = self.sweep_coefficients.shape[1]
-        # c_coefficients[0] = self.start_derivative / 2
-        c_coefficients[-1] = self.end_derivative / 2
+
+        # c_coefficients[0] = self.start_derivative / 2  # Value will be set by sweep coefficients at the last iteration
+        c_n_plus_1 = self.end_derivative / 2  # C coefficient of the auxiliary N+1th interval
+
+        ksi = self.sweep_coefficients[0][-1]
+        eta = self.sweep_coefficients[1][-1]
+        c = ksi * c_n_plus_1 + eta
+        c_coefficients[-1] = c  # C coefficient of the last Nth interval
 
         for i in range(length - 2, -1, -1):
             c_next = c_coefficients[i + 1]
