@@ -28,16 +28,16 @@ def do_splines():
     newton_table = NewtonTable(table)
 
     try:
-        newton_table.calculate_table(0, 3)
+        newton_table.calculate_table(table.points[0].x, 3)
     except ValueError:
         return
-    left_second_derivative = newton_table.get_second_derivative(0, 1e-6)
+    left_second_derivative = newton_table.get_second_derivative(table.points[0].x)
 
     try:
         newton_table.calculate_table(table.points[-1].x, 3)
     except ValueError:
         return
-    right_second_derivative = newton_table.get_second_derivative(table.points[-1].x, 1e-6)
+    right_second_derivative = newton_table.get_second_derivative(table.points[-1].x)
 
     try:
         spline_newton_left_derivative = Spline(table.to_nparray(), left_second_derivative, 0.0)

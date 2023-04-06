@@ -115,6 +115,12 @@ class DiffsTable:
 
         return approximated_value
 
+    def get_second_derivative(self, argument: float) -> float:
+        x0 = self.diffs[0][0]
+        x1 = self.diffs[0][1]
+        x2 = self.diffs[0][2]
+        return 2 * (self.diffs[3][0] + self.diffs[4][0] * (3 * argument - x0 - x1 - x2))
+
     def print_(self, table_name: str) -> None:
         if len(self.diffs) == 0:
             print("{} is empty\n".format(table_name))
@@ -152,25 +158,8 @@ class NewtonTable(DiffsTable):
     def get_value(self, argument: float) -> float:
         return super().get_value(argument)
 
-    def get_derivative(self, argument: float, epsilon: float) -> float:
-        x_1 = argument - epsilon
-        x_2 = argument + epsilon
-
-        y_1 = super().get_value(x_1)
-        y_2 = super().get_value(x_2)
-
-        return (y_2 - y_1) / epsilon
-
-    def get_second_derivative(self, argument: float, epsilon: float) -> float:
-        x_1 = argument - epsilon
-        x_2 = argument
-        x_3 = argument + epsilon
-
-        y_1 = super().get_value(x_1)
-        y_2 = super().get_value(x_2)
-        y_3 = super().get_value(x_3)
-
-        return (y_3 - 2 * y_2 + y_1) / epsilon ** 2
+    def get_second_derivative(self, argument: float) -> float:
+        return super().get_second_derivative(argument)
 
     def check_power(self, power: int) -> bool:
         return len(self.point_table) >= power + 1
