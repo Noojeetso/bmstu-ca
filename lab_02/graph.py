@@ -34,7 +34,7 @@ def draw_spline(spline: Spline, color: str, label: str, width='1'):
     for x in x_values:
         y_values.append(spline.get_value(x))
 
-    plt.plot(x_values, y_values, '-', color=color, linewidth=width, label=label)
+    plt.plot(x_values, y_values, '-', color=color, linewidth=width, label=label, alpha=0.5)
 
 
 def draw_dots(newton_table: NewtonTable, color: str, label: str):
@@ -44,7 +44,7 @@ def draw_dots(newton_table: NewtonTable, color: str, label: str):
         x_values.append(point.x)
         y_values.append(point.y)
 
-    plt.plot(x_values, y_values, 'o', color=color, linewidth='1', label=label)
+    plt.plot(x_values, y_values, 'o', color=color, linewidth='1', label=label, alpha=0.5)
 
 
 def draw_graph(newton_table: NewtonTable, spline_1: Spline, spline_2: Spline, spline_3: Spline):
