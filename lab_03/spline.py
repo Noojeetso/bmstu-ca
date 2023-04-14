@@ -113,6 +113,7 @@ class Spline:
         c_coefficients[-1] = c  # C coefficient of the last Nth interval
 
         for i in range(length - 2, -1, -1):
+            # print("really?")
             c_next = c_coefficients[i + 1]
             ksi = self.sweep_coefficients[0][i + 1]
             eta = self.sweep_coefficients[1][i + 1]

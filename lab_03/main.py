@@ -8,69 +8,53 @@ def do_splines():
     table.from_file("data.txt")
     # table.print("Table")
 
-    x = 1.5
-    y = 1.5
-    z = 1.5
+    # x = 1.5
+    # y = 1.5
+    # z = 3.99
+    #
+    # nx = 3
+    # ny = 4
+    # nz = 2
 
-    nx = 3
-    ny = 4
-    nz = 2
-
-    # x = float(input("Введите координату x:"))
-    # y = float(input("Введите координату y:"))
-    # z = float(input("Введите координату z:"))
-    #
-    # nx = float(input("Введите степень аппроксимации nx:"))
-    # ny = float(input("Введите степень аппроксимации ny:"))
-    # nz = float(input("Введите степень аппроксимации nz:"))
-
-    result = approximate_non_linear(table, x, y, z, nx, ny, nz)
-    print("Result: {:.3g}".format(result))
-
-    # try:
-    #     natural_spline = Spline(table.to_nparray(), 0.0, 0.0)
-    # except ValueError:
-    #     return
-    #
-    # raw_input = input("Input argument: ")
-    # try:
-    #     x = float(raw_input)
-    # except ValueError:
-    #     print("Incorrect argument")
-    #     return
-    #
-    # if not (table.points[0].x <= x <= table.points[-1].x):
-    #     print("Error: extrapolation")
-    #     return
-    #
-    # newton_table = NewtonTable(table)
-    #
-    # try:
-    #     newton_table.calculate_table(table.points[0].x, 3)
-    # except ValueError:
-    #     return
-    # left_second_derivative = newton_table.get_second_derivative(table.points[0].x, 1e-6)
-    #
-    # try:
-    #     newton_table.calculate_table(table.points[-1].x, 3)
-    # except ValueError:
-    #     return
-    # right_second_derivative = newton_table.get_second_derivative(table.points[-1].x, 1e-6)
-    #
-    # try:
-    #     spline_newton_left_derivative = Spline(table.to_nparray(), left_second_derivative, 0.0)
-    # except ValueError:
-    #     return
-    #
-    # try:
-    #     spline_newton_corner_derivatives = Spline(table.to_nparray(), left_second_derivative, right_second_derivative)
-    # except ValueError:
-    #     return
-    #
-    # try:
-    #     newton_table.calculate_table(x, 3)
-    # except ValueError:
-    #     return
+    run_menu = True
+    while run_menu:
+        print("\n1. Newton non-linear interpolation\n"
+              "2. Spline non-linear interpolation\n"
+              "3. Mixed non-linear interpolation\n"
+              "0. Exit")
+        try:
+            key = int(input("Input menu number: "))
+        except ValueError:
+            print("Error: incorrect number")
+            continue
+        if key == 0:
+            run_menu = False
+        elif key == 1:
+            x = float(input("Input coordinate x: "))
+            y = float(input("Input coordinate y: "))
+            z = float(input("Input coordinate z: "))
+            nx = int(input("Input polynom power nx: "))
+            ny = int(input("Input polynom power ny: "))
+            nz = int(input("Input polynom power nz: "))
+            result = nonlinear_newton(table, x, y, z, nx + 1, ny + 1, nz + 1)
+            print("\nResult: {:.3g}".format(result))
+        elif key == 2:
+            x = float(input("Input coordinate x: "))
+            y = float(input("Input coordinate y: "))
+            z = float(input("Input coordinate z: "))
+            result = nonlinear_spline(table, x, y, z)
+            print("\nResult: {:.3g}".format(result))
+        elif key == 3:
+            x = float(input("Input coordinate x: "))
+            y = float(input("Input coordinate y: "))
+            z = float(input("Input coordinate z: "))
+            nx = int(input("Input polynom power nx: "))
+            # ny = int(input("Input polynom power ny: "))
+            nz = int(input("Input polynom power nz: "))
+            result = nonlinear_mixed(table, x, y, z, nx + 1, nz + 1)
+            print("\nResult: {:.3g}".format(result))
+        else:
+            print("Error: unknown command")
 
 
 if __name__ == '__main__':

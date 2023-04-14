@@ -11,7 +11,7 @@ class PartialTable:
     inverse: bool = False
 
     def __init__(self, array: np.ndarray):
-        if self.array.shape[0] != 2:
+        if array.shape[0] != 2:
             print("Incorrect array shape")
             raise ValueError
 
@@ -30,7 +30,7 @@ class PartialTable:
     def set_partition(self, value: float, amount: int) -> None:
         self.bottom_index = 0
         # max_amount = len(self.point_table)
-        max_amount = len(self.array)
+        max_amount = len(self.array[1])
         max_index = max_amount - 1
         top_index = max_index
         self.top_index = top_index
@@ -46,6 +46,8 @@ class PartialTable:
         bottom_index = top_index
 
         while top_index - bottom_index < amount - 1:
+            # print("len:", len(self.array[1]))
+            # print(bottom_index, top_index, max_index, amount)
             if bottom_index > 0:
                 bottom_index -= 1
             if top_index - bottom_index == amount - 1:
@@ -102,12 +104,14 @@ class DiffsTable:
     power: int
     points_used: int
 
-    def __init__(self, array: np.ndarray):
-        if self.array.shape[0] != 2:
+    def __init__(self, array: np.ndarray, func_str, arg_str):
+        if array.shape[0] != 2:
             print("Incorrect array shape")
             raise ValueError
 
         # self.point_table = point_table
+        self.func_str = func_str
+        self.arg_str = arg_str
         self.array = array
         self.partial_table = PartialTable(self.array)
 
@@ -128,23 +132,23 @@ class DiffsTable:
             print("{} is empty\n".format(table_name))
             return
         print(table_name)
-        # function = self.point_table.function
-        # argument = self.point_table.argument
-        # if self.inverse:
-        #     function, argument = argument, function
-        # print("\t\t{:^10.10s}|{:^10.10s}".format(argument, function), end='')
-        # for i in range(1, len(self.diffs) - 1):
-        #     print("|{:^10.10s}".format("y" + "'" * i), end='')
-        # print("")
-        # for i in range(self.points_used):
-        #     print("{:2}).\t{: ^ 10.3f}|{: ^ 10.3f}".format(self.partial_table.bottom_index + i + 1,
-        #                                                    self.diffs[0][i], self.diffs[1][i]), end='')
-        #     for j in range(2, len(self.diffs)):
-        #         if len(self.diffs[j]) <= i:
-        #             continue
-        #         print("|{: ^ 10.3f}".format(self.diffs[j][i]), end='')
-        #     print("")
-        # print("")
+        function = self.func_str
+        argument = self.arg_str
+        if self.inverse:
+            function, argument = argument, function
+        print("\t\t{:^10.10s}|{:^10.10s}".format(argument, function), end='')
+        for i in range(1, len(self.diffs) - 1):
+            print("|{:^10.10s}".format(function + "'" * i), end='')
+        print("")
+        for i in range(self.points_used):
+            print("{:2}).\t{: ^ 10.3f}|{: ^ 10.3f}".format(self.partial_table.bottom_index + i + 1,
+                                                           self.diffs[0][i], self.diffs[1][i]), end='')
+            for j in range(2, len(self.diffs)):
+                if len(self.diffs[j]) <= i:
+                    continue
+                print("|{: ^ 10.3f}".format(self.diffs[j][i]), end='')
+            print("")
+        print("")
 
 
 class NewtonPolynom(DiffsTable):
@@ -183,7 +187,8 @@ class NewtonPolynom(DiffsTable):
 
     def check_power(self, power: int) -> bool:
         # return len(self.point_table) >= power + 1
-        return len(self.array[0]) >= power + 1
+        # print(self.array.shape[1], power + 1)
+        return self.array.shape[1] >= power + 1
 
     def update_partial_table(self, argument: float):
         self.partial_table.inverse = self.inverse

@@ -28,15 +28,6 @@ class ApproximationPlane:
         self.data = np.empty((x, y))
 
 
-class Layer:
-    z: float
-
-    def __init__(self, z: float):
-        self.z = z
-
-
-
-
 class PointTable:
     epsilon = 1e-6
     points: list[Point]
@@ -156,8 +147,8 @@ class PointTable:
                         x_index = x_indices[index - 1]
                         self.data[z_index][y_index][x_index] = values[index]
 
-        print()
-        print(self.data)
+        # print()
+        # print(self.data)
 
     def print(self, table_name: str):
         print(self.data)
