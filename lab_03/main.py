@@ -1,9 +1,7 @@
-from storage import PointTable
-from non_linear_approximation import *
-# from graph import draw_graph
+from non_linear_interpolation import *
 
 
-def do_splines():
+def do_interpolation():
     table = PointTable()
     table.from_file("data.txt")
     # table.print("Table")
@@ -49,4 +47,4 @@ def do_splines():
 
 
 if __name__ == '__main__':
-    do_splines()
+    do_interpolation()

@@ -2,7 +2,7 @@ import numpy as np
 
 from spline import Spline
 from newton_polynom import NewtonPolynom
-from storage import PointTable, Point
+from storage import PointTable
 
 
 def print_matrix(matrix: np.array, func, arg, nx, ny, bottom_x, bottom_y):
