@@ -8,14 +8,6 @@ def do_splines():
     table.from_file("data.txt")
     # table.print("Table")
 
-    # x = 1.5
-    # y = 1.5
-    # z = 3.99
-    #
-    # nx = 3
-    # ny = 4
-    # nz = 2
-
     run_menu = True
     while run_menu:
         print("\n1. Newton non-linear interpolation\n"
@@ -49,7 +41,6 @@ def do_splines():
             y = float(input("Input coordinate y: "))
             z = float(input("Input coordinate z: "))
             nx = int(input("Input polynom power nx: "))
-            # ny = int(input("Input polynom power ny: "))
             nz = int(input("Input polynom power nz: "))
             result = nonlinear_mixed(table, x, y, z, nx + 1, nz + 1)
             print("\nResult: {:.3g}".format(result))

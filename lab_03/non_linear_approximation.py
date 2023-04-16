@@ -86,61 +86,51 @@ def nonlinear_newton(table: PointTable, x: float, y: float, z: float, nx: int, n
         print("error: extrapolation by y coordinate")
         return float('NaN')
 
-    interpolated_plane = np.empty((ny, nx))
-    tmp_array = np.empty((2, nz))
-
-    if z_idx + 1 >= table.data.shape[0]:
-        print("error: extrapolation by z coordinate")
-        return float('NaN')
-
-    for i in range(nx):
-        x_idx = bottom_x + i
-        for j in range(ny):
-            y_idx = bottom_y + j
-
-            for k in range(nz):
-                tmp_array[0][k] = k + bottom_z
-            np.copyto(tmp_array[1], table.data[bottom_z:top_z+1, y_idx, x_idx])
-
-            polynom = NewtonPolynom(tmp_array, 'f', 'z')
-            polynom.calculate_table(z, nz - 1)
-            interpolated_in_z = polynom.get_value(z)
-
-            interpolated_plane[j][i] = interpolated_in_z
-
-    print("\nUSED LAYERS:")
+    tmp_z_array = np.empty((2, nz))
     for i in range(nz):
-        z_idx = i + bottom_z
+        tmp_z_array[0][i] = i + bottom_z
+
+    tmp_x_array = np.empty((2, nx))
+    for i in range(nx):
+        tmp_x_array[0][i] = i + bottom_x
+
+    tmp_y_array = np.empty((2, ny))
+    for i in range(ny):
+        tmp_y_array[0][i] = i + bottom_y
+
+    for i in range(nz):
+        z_idx = bottom_z + i
+
         print("\nz =", z_idx)
         print_matrix(table.data[z_idx], 'y', 'x', nx, ny, bottom_x, bottom_y)
 
-    print("\nINTERPOLATED Z LAYER:")
+        for j in range(ny):
+            y_idx = bottom_y + j
 
-    print_matrix(interpolated_plane, "y", "x", nx, ny, bottom_x, bottom_y)
+            tmp_x_array[1] = table.data[z_idx, y_idx, bottom_x:top_x + 1]
+            polynom = NewtonPolynom(tmp_x_array, 'f', 'x')
+            polynom.calculate_table(x, nx - 1)
+            interpolated_in_x = polynom.get_value(x)
 
-    interpolated_array = np.empty((2, ny))
-    tmp_array = np.empty((2, nx))
-    for k in range(nx):
-        tmp_array[0][k] = k + bottom_x
+            tmp_y_array[1][j] = interpolated_in_x
 
-    for i in range(ny):
-        interpolated_array[0][i] = i + bottom_y
+        print("\nINTERPOLATED Y ARRAY (x = ",  x, "):", sep='')
+        print_array(tmp_y_array, 'f', 'y', ny, bottom_y)
 
-    for i in range(ny):
-        np.copyto(tmp_array[1], interpolated_plane[i, :])
-        polynom = NewtonPolynom(tmp_array, 'f', 'x')
+        polynom = NewtonPolynom(tmp_y_array, 'f', 'y')
+        polynom.calculate_table(y, ny - 1)
+        interpolated_in_y = polynom.get_value(y)
+        tmp_z_array[1][i] = interpolated_in_y
 
-        polynom.calculate_table(x, nx - 1)
-        interpolated_in_x = polynom.get_value(x)
-        interpolated_array[1][i] = interpolated_in_x
+        print("\nInterpolated function value (z = {:.3g})".format(interpolated_in_y))
 
-    print("\nINTERPOLATED ARRAY:")
-    print_array(interpolated_array, 'f', 'y', ny, bottom_y)
+    print("\nINTERPOLATED Z ARRAY:")
+    print_array(tmp_z_array, 'f', 'z', nz, bottom_z)
 
-    polynom = NewtonPolynom(interpolated_array, 'f', 'y')
-    polynom.calculate_table(y, ny - 1)
+    polynom = NewtonPolynom(tmp_z_array, 'f', 'z')
+    polynom.calculate_table(z, nz - 1)
 
-    return polynom.get_value(y)
+    return polynom.get_value(z)
 
 
 def nonlinear_spline(table: PointTable, x: float, y: float, z: float) -> float:
@@ -168,55 +158,47 @@ def nonlinear_spline(table: PointTable, x: float, y: float, z: float) -> float:
         print("error: extrapolation by y coordinate")
         return float('NaN')
 
-    interpolated_plane = np.empty((ny, nx))
-    tmp_array = np.empty((2, nz))
-
-    if z_idx + 1 >= table.data.shape[0]:
-        print("error: extrapolation by z coordinate")
-        return float('NaN')
-
-    for i in range(nx):
-        x_idx = bottom_x + i
-        for j in range(ny):
-            y_idx = bottom_y + j
-
-            for k in range(nz):
-                tmp_array[0][k] = k + bottom_z
-            np.copyto(tmp_array[1], table.data[bottom_z:top_z+1, y_idx, x_idx])
-
-            spline = Spline(tmp_array, 0, 0)
-            interpolated_in_z = spline.get_value(z)
-            interpolated_plane[j][i] = interpolated_in_z
-
-    print("\nUSED LAYERS:")
+    tmp_z_array = np.empty((2, nz))
     for i in range(nz):
-        z_idx = i + bottom_z
+        tmp_z_array[0][i] = i + bottom_z
+
+    tmp_x_array = np.empty((2, nx))
+    for i in range(nx):
+        tmp_x_array[0][i] = i + bottom_x
+
+    tmp_y_array = np.empty((2, ny))
+    for i in range(ny):
+        tmp_y_array[0][i] = i + bottom_y
+
+    for i in range(nz):
+        z_idx = bottom_z + i
+
         print("\nz =", z_idx)
         print_matrix(table.data[z_idx], 'y', 'x', nx, ny, bottom_x, bottom_y)
 
-    print("\nINTERPOLATED Z LAYER:")
-    print_matrix(interpolated_plane, "y", "x", nx, ny, bottom_x, bottom_y)
+        for j in range(ny):
+            y_idx = bottom_y + j
 
-    interpolated_array = np.empty((2, ny))
-    tmp_array = np.empty((2, nx))
-    for k in range(nx):
-        tmp_array[0][k] = k + bottom_x
+            tmp_x_array[1] = table.data[z_idx, y_idx, bottom_x:top_x + 1]
 
-    for i in range(ny):
-        interpolated_array[0][i] = i + bottom_y
+            spline = Spline(tmp_x_array, 0, 0)
+            tmp_y_array[1][j] = spline.get_value(x)
 
-    for i in range(ny):
-        np.copyto(tmp_array[1], interpolated_plane[i, :])
-        spline = Spline(tmp_array, 0, 0)
-        interpolated_in_x = spline.get_value(x)
-        interpolated_array[1][i] = interpolated_in_x
+        print("\nINTERPOLATED Y ARRAY (x = ",  x, "):", sep='')
+        print_array(tmp_y_array, 'f', 'y', ny, bottom_y)
 
-    print("\nINTERPOLATED ARRAY:")
-    print_array(interpolated_array, 'f', 'y', ny, bottom_y)
+        spline = Spline(tmp_y_array, 0, 0)
+        interpolated_in_y = spline.get_value(y)
+        tmp_z_array[1][i] = interpolated_in_y
 
-    spline = Spline(interpolated_array, 0, 0)
+        print("\nInterpolated function value (z = {:.3g})".format(interpolated_in_y))
 
-    return spline.get_value(y)
+    print("\nINTERPOLATED Z ARRAY:")
+    print_array(tmp_z_array, 'f', 'z', nz, bottom_z)
+
+    spline = Spline(tmp_z_array, 0, 0)
+
+    return spline.get_value(z)
 
 
 def nonlinear_mixed(table: PointTable, x: float, y: float, z: float, nx: int, nz: int) -> float:
@@ -251,54 +233,47 @@ def nonlinear_mixed(table: PointTable, x: float, y: float, z: float, nx: int, nz
         print("error: extrapolation by y coordinate")
         return float('NaN')
 
-    interpolated_plane = np.empty((ny, nx))
-    tmp_array = np.empty((2, nz))
-
-    if z_idx + 1 >= table.data.shape[0]:
-        print("error: extrapolation by z coordinate")
-        return float('NaN')
-
-    for i in range(nx):
-        x_idx = bottom_x + i
-        for j in range(ny):
-            y_idx = bottom_y + j
-
-            for k in range(nz):
-                tmp_array[0][k] = k + bottom_z
-            np.copyto(tmp_array[1], table.data[bottom_z:top_z+1, y_idx, x_idx])
-
-            polynom = NewtonPolynom(tmp_array, 'f', 'z')
-            polynom.calculate_table(z, nz - 1)
-            interpolated_in_z = polynom.get_value(z)
-            interpolated_plane[j][i] = interpolated_in_z
-
-    print("\nUSED LAYERS:")
+    tmp_z_array = np.empty((2, nz))
     for i in range(nz):
-        z_idx = i + bottom_z
+        tmp_z_array[0][i] = i + bottom_z
+
+    tmp_x_array = np.empty((2, nx))
+    for i in range(nx):
+        tmp_x_array[0][i] = i + bottom_x
+
+    tmp_y_array = np.empty((2, ny))
+    for i in range(ny):
+        tmp_y_array[0][i] = i + bottom_y
+
+    for i in range(nz):
+        z_idx = bottom_z + i
+
         print("\nz =", z_idx)
         print_matrix(table.data[z_idx], 'y', 'x', nx, ny, bottom_x, bottom_y)
 
-    print("\nINTERPOLATED Z LAYER:")
-    print_matrix(interpolated_plane, "y", "x", nx, ny, bottom_x, bottom_y)
+        for j in range(ny):
+            y_idx = bottom_y + j
 
-    interpolated_array = np.empty((2, ny))
-    tmp_array = np.empty((2, nx))
-    for k in range(nx):
-        tmp_array[0][k] = k + bottom_x
+            tmp_x_array[1] = table.data[z_idx, y_idx, bottom_x:top_x + 1]
+            polynom = NewtonPolynom(tmp_x_array, 'f', 'x')
+            polynom.calculate_table(x, nx - 1)
+            interpolated_in_x = polynom.get_value(x)
 
-    for i in range(ny):
-        interpolated_array[0][i] = i + bottom_y
+            tmp_y_array[1][j] = interpolated_in_x
 
-    for i in range(ny):
-        np.copyto(tmp_array[1], interpolated_plane[i, :])
-        polynom = NewtonPolynom(tmp_array, 'f', 'x')
-        polynom.calculate_table(x, nx - 1)
-        interpolated_in_x = polynom.get_value(x)
-        interpolated_array[1][i] = interpolated_in_x
+        print("\nINTERPOLATED Y ARRAY (x = ",  x, "):", sep='')
+        print_array(tmp_y_array, 'f', 'y', ny, bottom_y)
 
-    print("\nINTERPOLATED ARRAY:")
-    print_array(interpolated_array, 'f', 'y', ny, bottom_y)
+        spline = Spline(tmp_y_array, 0, 0)
+        interpolated_in_y = spline.get_value(y)
+        tmp_z_array[1][i] = interpolated_in_y
 
-    spline = Spline(interpolated_array, 0, 0)
+        print("\nInterpolated function value (z = {:.3g})".format(interpolated_in_y))
 
-    return spline.get_value(y)
+    print("\nINTERPOLATED Z ARRAY:")
+    print_array(tmp_z_array, 'f', 'z', nz, bottom_z)
+
+    polynom = NewtonPolynom(tmp_z_array, 0, 0)
+    polynom.calculate_table(z, nz - 1)
+
+    return polynom.get_value(z)
